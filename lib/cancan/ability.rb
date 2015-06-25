@@ -135,6 +135,24 @@ module CanCan
     def can(action = nil, subject = nil, conditions = nil, &block)
       rules << Rule.new(true, action, subject, conditions, block)
     end
+  def permissions
+      permissions_list = {:can => {}, :cannot => {}}
+
+      rules.each do |rule|
+        subjects = rule.subjects
+        expand_actions(rule.actions).each do |action|
+          if(rule.base_behavior)
+            permissions_list[:can][action] ||= []
+            permissions_list[:can][action] += subjects.map(&:to_s)
+          else
+            permissions_list[:cannot][action] ||= []
+            permissions_list[:cannot][action] += subjects.map(&:to_s)
+          end
+        end
+      end
+
+      permissions_list
+    end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
     #
